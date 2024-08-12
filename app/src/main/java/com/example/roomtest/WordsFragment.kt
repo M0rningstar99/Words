@@ -44,7 +44,9 @@ class WordsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         wordViewModel =ViewModelProvider(requireActivity()).get(WordViewModel::class.java)
-        recyclerView = requireActivity().findViewById(R.id.recyclerview)
+        //        recyclerView = requireActivity().findViewById(R.id.recyclerview)
+        recyclerView = view.findViewById(R.id.recyclerview)
+
         recyclerView.layoutManager = LinearLayoutManager(requireActivity())
         myAdapter1 = MyAdapter(false,wordViewModel)
         myAdapter2 =MyAdapter(true,wordViewModel)
