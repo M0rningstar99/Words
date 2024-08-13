@@ -3,8 +3,12 @@ package com.example.roomtest
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.SearchView
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
@@ -28,6 +32,7 @@ class WordsFragment : Fragment() {
    lateinit var myAdapter1: MyAdapter
    lateinit var myAdapter2: MyAdapter
    lateinit var floatingActionButton: FloatingActionButton
+   lateinit var filteredWords:LiveData<List<Word>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,6 +40,8 @@ class WordsFragment : Fragment() {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
+        //显示右上角的menu
+        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(
@@ -56,7 +63,8 @@ class WordsFragment : Fragment() {
         myAdapter2 =MyAdapter(true,wordViewModel)
 
         recyclerView.adapter = myAdapter1
-        wordViewModel.getAllWordsLive().observe(requireActivity(), Observer<List<Word>> { words ->
+        filteredWords = wordViewModel.getAllWordsLive()
+        filteredWords.observe(requireActivity(), Observer<List<Word>> { words ->
             var temp = myAdapter1.itemCount
             myAdapter1.allWords = words
             myAdapter2.allWords = words
@@ -69,7 +77,43 @@ class WordsFragment : Fragment() {
         floatingActionButton.setOnClickListener{
             var navC = Navigation.findNavController(view)
             navC.navigate(R.id.action_wordsFragment_to_addFragment)
+
         }
+    }
+
+    //添加右上角的功能条
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.main_menu,menu)
+        var searchView=menu.findItem(R.id.app_bar_search).actionView as SearchView
+        //设置搜索框的最大宽度
+        searchView.maxWidth = 1000
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                // Handle query submission
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                // Handle query text change
+                var patten:String = newText?.trim() ?: ""
+                //每次使用都需要先停止之前观察
+              filteredWords.removeObservers(requireActivity())
+                filteredWords = wordViewModel.findWordsWithPatten(patten)
+                filteredWords.observe(requireActivity(), Observer<List<Word>> { words ->
+                    var temp = myAdapter1.itemCount
+                    myAdapter1.allWords = words
+                    myAdapter2.allWords = words
+                    if (temp != words.size) {
+                        myAdapter1.notifyDataSetChanged()
+                        myAdapter2.notifyDataSetChanged()
+                    }
+                })
+
+
+                return true
+            }
+        })
     }
 
 

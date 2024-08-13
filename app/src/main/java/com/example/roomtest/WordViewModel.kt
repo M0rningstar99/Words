@@ -33,6 +33,9 @@ class WordViewModel(application: Application) : AndroidViewModel(application) {
     fun getAllWordsLive():LiveData<List<Word>>{
         return  wordRepository.getAllWordsLive()
     }
+    fun  findWordsWithPatten(patten:String):LiveData<List<Word>>{
+        return wordRepository.findWordsWithPatten(patten)
+    }
 
 
 

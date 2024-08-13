@@ -24,4 +24,8 @@ interface WordDao {
     @Query("SELECT * FROM WORD ORDER BY ID DESC")
     fun getAllWordsLive(): LiveData<List<Word>>
 
+
+    @Query("SELECT * FROM WORD WHERE english LIKE :patten  ORDER BY ID DESC")
+    fun findWordsWithPatten(patten:String): LiveData<List<Word>>
+
 }

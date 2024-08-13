@@ -45,6 +45,10 @@ class WordRepository(context: Context) {
         return allWordsList
     }
 
+    fun findWordsWithPatten(patten:String): LiveData<List<Word>>{
+        return wordDao.findWordsWithPatten("%"+ patten +"%")
+    }
+
 
     class InsertAsyncTask : AsyncTask<Word, Void, Void>() {
         lateinit var wordDao: WordDao
