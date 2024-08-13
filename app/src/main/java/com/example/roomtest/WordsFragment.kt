@@ -7,8 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import java.nio.FloatBuffer
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -24,6 +27,7 @@ class WordsFragment : Fragment() {
    lateinit var recyclerView: RecyclerView
    lateinit var myAdapter1: MyAdapter
    lateinit var myAdapter2: MyAdapter
+   lateinit var floatingActionButton: FloatingActionButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,6 +65,11 @@ class WordsFragment : Fragment() {
                 myAdapter2.notifyDataSetChanged()
             }
         })
+        floatingActionButton = view.findViewById(R.id.floatingActionButton)
+        floatingActionButton.setOnClickListener{
+            var navC = Navigation.findNavController(view)
+            navC.navigate(R.id.action_wordsFragment_to_addFragment)
+        }
     }
 
 
