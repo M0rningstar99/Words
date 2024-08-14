@@ -81,7 +81,7 @@ class WordsFragment : Fragment() {
         }
 
         filteredWords = wordViewModel.getAllWordsLive()
-        filteredWords.observe(requireActivity(), Observer<List<Word>> { words ->
+        filteredWords.observe(viewLifecycleOwner, Observer<List<Word>> { words ->
             var temp = myAdapter1.itemCount
             myAdapter1.allWords = words
             myAdapter2.allWords = words
@@ -115,9 +115,9 @@ class WordsFragment : Fragment() {
                 // Handle query text change
                 var patten:String = newText?.trim() ?: ""
                 //每次使用都需要先停止之前观察
-              filteredWords.removeObservers(requireActivity())
+              filteredWords.removeObservers(viewLifecycleOwner)
                 filteredWords = wordViewModel.findWordsWithPatten(patten)
-                filteredWords.observe(requireActivity(), Observer<List<Word>> { words ->
+                filteredWords.observe(viewLifecycleOwner, Observer<List<Word>> { words ->
                     var temp = myAdapter1.itemCount
                     myAdapter1.allWords = words
                     myAdapter2.allWords = words
