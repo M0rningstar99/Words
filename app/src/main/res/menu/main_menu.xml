@@ -12,6 +12,6 @@
         android:id="@+id/clear"
         android:title="clear_data" />
     <item
-        android:id="@+id/swith"
+        android:id="@+id/switch_data"
         android:title="swith_data" />
 </menu>

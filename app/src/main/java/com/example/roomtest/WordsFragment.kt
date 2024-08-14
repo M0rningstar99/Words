@@ -1,13 +1,18 @@
 package com.example.roomtest
 
+import android.content.Context
+import android.content.DialogInterface
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SearchView
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -33,7 +38,8 @@ class WordsFragment : Fragment() {
    lateinit var myAdapter2: MyAdapter
    lateinit var floatingActionButton: FloatingActionButton
    lateinit var filteredWords:LiveData<List<Word>>
-
+    val VIEW_TYPE_SHP = "view_type_shp"
+    val IS_USING_CARD_VIEW = "is_using_card_view"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -62,7 +68,18 @@ class WordsFragment : Fragment() {
         myAdapter1 = MyAdapter(false,wordViewModel)
         myAdapter2 =MyAdapter(true,wordViewModel)
 
-        recyclerView.adapter = myAdapter1
+//        recyclerView.adapter = myAdapter1
+        var shp = requireActivity().getSharedPreferences(VIEW_TYPE_SHP,Context.MODE_PRIVATE)
+        var viewType = shp.getBoolean(IS_USING_CARD_VIEW,false)
+
+        if (viewType){
+            recyclerView.adapter = myAdapter2
+
+        }else{
+            recyclerView.adapter = myAdapter1
+
+        }
+
         filteredWords = wordViewModel.getAllWordsLive()
         filteredWords.observe(requireActivity(), Observer<List<Word>> { words ->
             var temp = myAdapter1.itemCount
@@ -114,6 +131,46 @@ class WordsFragment : Fragment() {
                 return true
             }
         })
+    }
+
+    //clean and switch
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.getItemId()){
+            R.id.clear ->{
+                var builder:AlertDialog.Builder = AlertDialog.Builder(requireActivity())
+                builder.setTitle("清空数据")
+                builder.setPositiveButton("确定",object :DialogInterface.OnClickListener{
+                    override fun onClick(p0: DialogInterface?, p1: Int) {
+                        wordViewModel.deleteAllWords()
+                    }
+
+                })
+                builder.setNegativeButton("取消",object :DialogInterface.OnClickListener{
+                    override fun onClick(p0: DialogInterface?, p1: Int) {
+
+                    }
+
+                })
+                builder.create()
+                builder.show()
+
+            }
+            R.id.switch_data ->{
+                var shp = requireActivity().getSharedPreferences(VIEW_TYPE_SHP,Context.MODE_PRIVATE)
+                var viewType = shp.getBoolean(IS_USING_CARD_VIEW,false)
+                var editor = shp.edit()
+                if (viewType){
+                    recyclerView.adapter = myAdapter1
+                    editor.putBoolean(IS_USING_CARD_VIEW,false)
+                }else{
+                    recyclerView.adapter = myAdapter2
+                    editor.putBoolean(IS_USING_CARD_VIEW,true)
+                }
+                editor.apply()
+            }
+
+        }
+        return super.onOptionsItemSelected(item)
     }
 
 
