@@ -10,6 +10,7 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.widget.SearchView
 import androidx.appcompat.app.AlertDialog
@@ -17,9 +18,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 import java.nio.FloatBuffer
 
 // TODO: Rename parameter arguments, choose names that match
@@ -38,6 +42,8 @@ class WordsFragment : Fragment() {
    lateinit var myAdapter2: MyAdapter
    lateinit var floatingActionButton: FloatingActionButton
    lateinit var filteredWords:LiveData<List<Word>>
+   lateinit var  allWords:List<Word>
+   lateinit var  dividerItemDecoration: DividerItemDecoration
     val VIEW_TYPE_SHP = "view_type_shp"
     val IS_USING_CARD_VIEW = "is_using_card_view"
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,18 +77,20 @@ class WordsFragment : Fragment() {
 //        recyclerView.adapter = myAdapter1
         var shp = requireActivity().getSharedPreferences(VIEW_TYPE_SHP,Context.MODE_PRIVATE)
         var viewType = shp.getBoolean(IS_USING_CARD_VIEW,false)
-
+        dividerItemDecoration = DividerItemDecoration(requireActivity(),DividerItemDecoration.VERTICAL)
         if (viewType){
             recyclerView.adapter = myAdapter2
 
         }else{
             recyclerView.adapter = myAdapter1
+            recyclerView.addItemDecoration((dividerItemDecoration))
 
         }
 
         filteredWords = wordViewModel.getAllWordsLive()
         filteredWords.observe(viewLifecycleOwner, Observer<List<Word>> { words ->
             var temp = myAdapter1.itemCount
+            allWords = words
             myAdapter1.allWords = words
             myAdapter2.allWords = words
             if (temp != words.size) {
@@ -90,6 +98,36 @@ class WordsFragment : Fragment() {
                 myAdapter2.notifyDataSetChanged()
             }
         })
+
+        //滑动删除
+        ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, ItemTouchHelper.START or ItemTouchHelper.END) {
+            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+//                var wordFrom = allWords.get(viewHolder.adapterPosition)
+//                var wordTo = allWords.get(target.adapterPosition)
+//                var idTemp = wordFrom.id
+//                wordFrom.id = wordTo.id
+//                wordTo.id = idTemp
+//                wordViewModel.updateWords(wordFrom,wordTo)
+//                wordViewModel.updateWords(wordTo,wordFrom)
+//
+//                myAdapter1.notifyItemChanged(viewHolder.adapterPosition,target.adapterPosition)
+//                myAdapter2.notifyItemChanged(viewHolder.adapterPosition,target.adapterPosition)
+
+                return true
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                // Handle swipe actions here
+                var wordToDelete = allWords.get(viewHolder.adapterPosition)
+                wordViewModel.deleteWords(wordToDelete)
+                Snackbar.make(requireActivity().findViewById(R.id.fragment_words),"删除一个词汇",Snackbar.LENGTH_SHORT)
+                    .setAction("撤销", View.OnClickListener() {
+                        wordViewModel.insertWords(wordToDelete)
+
+                    }).show()
+
+            }
+        }).attachToRecyclerView(recyclerView)
         floatingActionButton = view.findViewById(R.id.floatingActionButton)
         floatingActionButton.setOnClickListener{
             var navC = Navigation.findNavController(view)
@@ -119,6 +157,7 @@ class WordsFragment : Fragment() {
                 filteredWords = wordViewModel.findWordsWithPatten(patten)
                 filteredWords.observe(viewLifecycleOwner, Observer<List<Word>> { words ->
                     var temp = myAdapter1.itemCount
+                    allWords = words
                     myAdapter1.allWords = words
                     myAdapter2.allWords = words
                     if (temp != words.size) {
@@ -161,9 +200,11 @@ class WordsFragment : Fragment() {
                 var editor = shp.edit()
                 if (viewType){
                     recyclerView.adapter = myAdapter1
+                    recyclerView.addItemDecoration(dividerItemDecoration)
                     editor.putBoolean(IS_USING_CARD_VIEW,false)
                 }else{
                     recyclerView.adapter = myAdapter2
+                    recyclerView.removeItemDecoration(dividerItemDecoration)
                     editor.putBoolean(IS_USING_CARD_VIEW,true)
                 }
                 editor.apply()

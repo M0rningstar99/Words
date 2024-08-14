@@ -45,12 +45,12 @@ class MyAdapter : RecyclerView.Adapter<MyViewHolder> {
             layoutInflater.inflate(R.layout.cell_normal_2, parent, false)
         }
         val holder = MyViewHolder(itemView)
-        holder.itemView.setOnClickListener {
-            var uri = Uri.parse("https://m.youdao.com/dict?le=eng&q=" + holder.english.text)
-            var intent = Intent(Intent.ACTION_VIEW)
-            intent.data = uri
-            holder.itemView.context.startActivity(intent)
-        }
+//        holder.itemView.setOnClickListener {
+//            var uri = Uri.parse("https://m.youdao.com/dict?le=eng&q=" + holder.english.text)
+//            var intent = Intent(Intent.ACTION_VIEW)
+//            intent.data = uri
+//            holder.itemView.context.startActivity(intent)
+//        }
         holder.switch.setOnCheckedChangeListener { buttonView, isChecked ->
             var word: Word = holder.itemView.getTag(R.id.word_for_view_holder) as Word
             if (isChecked) {
